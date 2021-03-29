@@ -26,13 +26,13 @@ public class DataGenerator {
 
     private DataSet normalDataSet(){
         //create normal distribution with mean .05 and sd .05/3 so that 99.7% of events are < .1
-        NormalDistribution normalDistribution = new NormalDistribution(.05, .05/3);
+        NormalDistribution normalDistribution = new NormalDistribution(50, 50/3);
         DataSet dataSet = new DataSet();
         Task[] tasks = new Task[NUM_DISTINCT_TASKS];
         //generate costs from sampling from normal distribution
         for(int i=0; i < NUM_DISTINCT_TASKS; i++){
             UUID uuid = UUID.randomUUID();
-            Double cost = Math.max(0.001, normalDistribution.sample()); //make sure no 0 cost events
+            Long cost = (long) Math.max(1, normalDistribution.sample()); //make sure no 0 cost events
             tasks[i] = new Task(cost, uuid);
         }
         //generate task multiplities from sampling from uniform distribution
@@ -44,13 +44,13 @@ public class DataGenerator {
 
     private DataSet caucyDataSet(){
         //See https://keisan.casio.com/exec/system/1180573167 for what percentiles of this distribution look like
-        CauchyDistribution cauchyDistribution = new CauchyDistribution(.05, .005);
+        CauchyDistribution cauchyDistribution = new CauchyDistribution(50, 5);
         DataSet dataSet = new DataSet();
         Task[] tasks = new Task[NUM_DISTINCT_TASKS];
         //generate costs from sampling from normal distribution
         for(int i=0; i < NUM_DISTINCT_TASKS; i++){
             UUID uuid = UUID.randomUUID();
-            Double cost = Math.max(0.001, cauchyDistribution.sample()); //make sure no 0 cost events
+            Long cost = (long) Math.max(1, cauchyDistribution.sample()); //make sure no 0 cost events
             tasks[i] = new Task(cost, uuid);
         }
         //generate task multiplities from sampling from uniform distribution
@@ -66,7 +66,7 @@ public class DataGenerator {
         //generate costs from sampling from unifrom distribution over (0,.1)
         for(int i=0; i < NUM_DISTINCT_TASKS; i++){
             UUID uuid = UUID.randomUUID();
-            Double cost = ((double) random.nextInt(101))/1000;
+            Long cost = (long) random.nextInt(101);
             tasks[i] = new Task(cost, uuid);
         }
         //generate task multiplities from sampling from uniform distribution

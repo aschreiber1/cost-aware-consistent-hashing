@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Task {
     //amount of time to sleep for, for each task
-    private Double cost;
+    private Long cost;
     //used to identify which host to map the job to
     private UUID id;
 }
