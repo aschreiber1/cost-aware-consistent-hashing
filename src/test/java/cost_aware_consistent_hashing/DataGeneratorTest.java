@@ -27,5 +27,10 @@ public class DataGeneratorTest {
         DataSet dataSet = dataGenerator.getDataset(DataSetType.CAUCHY);
         assertEquals(NUM_TASKS, dataSet.getTasks().size());
     }
-    
+
+    @Test
+    public void testZipf(){
+        DataSet dataSet = dataGenerator.getDataset(DataSetType.ZIPF);
+        assertEquals(NUM_TASKS, dataSet.getTasks().size());
+    }
 }

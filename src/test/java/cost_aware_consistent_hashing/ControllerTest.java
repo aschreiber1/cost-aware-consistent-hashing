@@ -9,13 +9,20 @@ public class ControllerTest {
     
     @Test
     public void uniformTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.UNIFORM);
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.UNIFORM, AlgorithmType.MODULO);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
     @Test
     public void normalTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL);
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL, AlgorithmType.MODULO);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+
+    @Test
+    public void zipfTest() throws InterruptedException{
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.MODULO);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 }

@@ -10,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 public class Controller {
     DataGenerator dataGenerator = new DataGenerator();
     
-    public ExperimentResults runExperiment(DataSetType dataSetType) throws InterruptedException{
+    public ExperimentResults runExperiment(DataSetType dataSetType, AlgorithmType algorithmType) throws InterruptedException{
         System.out.println(String.format("Starting Experiment with Dataset Type %s", dataSetType));
         ExperimentResults results = new ExperimentResults();
         DataSet dataSet = dataGenerator.getDataset(dataSetType);
@@ -26,14 +26,14 @@ public class Controller {
 
         final long startTime = System.currentTimeMillis();
 
-        int num_batches = NUM_TASKS/BATCH_SIZE;
-        for(int i=0; i < num_batches; i++){
-            System.out.println(String.format("Working on Batch %d of %d", i, num_batches));
+        int numBatches = NUM_TASKS/BATCH_SIZE;
+        for(int i=0; i < numBatches; i++){
+            System.out.println(String.format("Working on Batch %d of %d", i, numBatches));
             //publish batch of tasks to appropriate queues
             for(int j = 0; j < BATCH_SIZE; j++){
                 Task task = dataSet.getTasks().removeFirst();
                 //Thie currenty uses regular hashing, we should implement consistent hashing
-                int serverNum = Math.abs(task.getId().hashCode()) % NUM_SERVERS;
+                int serverNum = decideServer(algorithmType, task);
                 queues[serverNum].add(task);
             }
             //wait for all queues to be cleared
@@ -60,5 +60,15 @@ public class Controller {
         System.out.println(String.format("Experiment with Dataset Type %s took %d", dataSetType, endTime-startTime));
 
         return results;
+    }
+    
+    /*
+    * Map a task to a server
+    */
+    private int decideServer(AlgorithmType algorithmType, Task task){
+        if(algorithmType == AlgorithmType.MODULO){
+            return Math.abs(task.getId().hashCode()) % NUM_SERVERS;
+        }
+        throw new RuntimeException(String.format("Algorithm Type %s, did not match any configured type", algorithmType));
     }
 }
