@@ -26,6 +26,12 @@ public class ControllerTest {
     }
 
     @Test
+    public void normalBoundedLoadTest() throws InterruptedException{
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL, AlgorithmType.BOUNDED_LOAD);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
     public void zipfTest() throws InterruptedException{
         ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.MODULO);
         assertTrue(experimentResults.getTotalTime() > 0);

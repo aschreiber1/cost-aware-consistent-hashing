@@ -33,8 +33,7 @@ public class Controller {
             //publish batch of tasks to appropriate queues
             for(int j = 0; j < BATCH_SIZE; j++){
                 Task task = dataSet.getTasks().removeFirst();
-                //Thie currenty uses regular hashing, we should implement consistent hashing
-                int serverNum = serverDecider.hash(algorithmType, task, workerInfos);
+                int serverNum = serverDecider.hash(algorithmType, task, workerInfos, queues);
                 queues[serverNum].add(task);
             }
             //wait for all queues to be cleared

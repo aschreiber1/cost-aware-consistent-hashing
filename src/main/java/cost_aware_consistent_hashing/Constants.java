@@ -11,5 +11,6 @@ public final class Constants {
     public static final int NUM_DISTINCT_TASKS = 500;
     public static final Long STOP_WORKER = -1L;
     public static final int BATCH_SIZE = 100;
-
+    public static final Double EPSILON = .3;
+    public static final int NUM_REPLICAS = 5;
 }
