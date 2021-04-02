@@ -1,5 +1,8 @@
 package cost_aware_consistent_hashing;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 
 import lombok.Getter;
@@ -10,6 +13,7 @@ import static cost_aware_consistent_hashing.Constants.*;
 public class Worker implements Runnable {
     private BlockingQueue<Task> queue;
     private WorkerInfo workerInfo;
+    private HashSet<UUID> cache = new HashSet<>();
     
     public Worker(BlockingQueue<Task> queue, WorkerInfo workerInfo) {
         this.queue = queue;
@@ -22,7 +26,14 @@ public class Worker implements Runnable {
                 if (task.getCost().equals(STOP_WORKER)) {
                     return;
                 }
-                Thread.sleep(task.getCost());
+                if(!cache.contains(task.getId())){
+                    Thread.sleep(task.getCost());
+                    cache.add(task.getId());
+                }
+                else{
+                    Thread.sleep((long)(task.getCost()*(1-CACHE_EFFECTIVENESS)));
+
+                }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

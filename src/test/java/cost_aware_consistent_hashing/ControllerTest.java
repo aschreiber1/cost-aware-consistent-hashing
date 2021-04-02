@@ -38,8 +38,20 @@ public class ControllerTest {
     }
 
     @Test
-    public void zipfTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.MODULO);
+    public void zipfConsistentTest() throws InterruptedException{
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.CONSISTENT);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void zipfBoundedTest() throws InterruptedException{
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.BOUNDED_LOAD);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void zipfRehashTest() throws InterruptedException{
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.REHASH);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 }
