@@ -19,6 +19,11 @@ public class ControllerTest {
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
+    @Test
+    public void normalConsitentTest() throws InterruptedException{
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL, AlgorithmType.CONSISTENT);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
 
     @Test
     public void zipfTest() throws InterruptedException{

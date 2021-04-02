@@ -14,6 +14,7 @@ public class Controller {
         System.out.println(String.format("Starting Experiment with Dataset Type %s", dataSetType));
         ExperimentResults results = new ExperimentResults();
         DataSet dataSet = dataGenerator.getDataset(dataSetType);
+        ServerDecider serverDecider = new ServerDecider();
 
         WorkerInfo[] workerInfos = new WorkerInfo[NUM_SERVERS];
         BlockingQueue<Task>[] queues = new ArrayBlockingQueue[NUM_SERVERS];
@@ -33,7 +34,7 @@ public class Controller {
             for(int j = 0; j < BATCH_SIZE; j++){
                 Task task = dataSet.getTasks().removeFirst();
                 //Thie currenty uses regular hashing, we should implement consistent hashing
-                int serverNum = decideServer(algorithmType, task);
+                int serverNum = serverDecider.hash(algorithmType, task, workerInfos);
                 queues[serverNum].add(task);
             }
             //wait for all queues to be cleared
@@ -60,15 +61,5 @@ public class Controller {
         System.out.println(String.format("Experiment with Dataset Type %s took %d", dataSetType, endTime-startTime));
 
         return results;
-    }
-    
-    /*
-    * Map a task to a server
-    */
-    private int decideServer(AlgorithmType algorithmType, Task task){
-        if(algorithmType == AlgorithmType.MODULO){
-            return Math.abs(task.getId().hashCode()) % NUM_SERVERS;
-        }
-        throw new RuntimeException(String.format("Algorithm Type %s, did not match any configured type", algorithmType));
     }
 }
