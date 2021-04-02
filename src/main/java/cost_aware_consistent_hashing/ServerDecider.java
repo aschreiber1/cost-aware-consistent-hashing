@@ -2,9 +2,13 @@ package cost_aware_consistent_hashing;
 
 import static cost_aware_consistent_hashing.Constants.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 
 import com.google.common.hash.HashFunction;
@@ -12,7 +16,9 @@ import com.google.common.hash.Hashing;
 
 public class ServerDecider {
     final HashFunction hashFunction = Hashing.hmacMd5("myKey".getBytes());
-    private final SortedMap<Integer, Integer> map = new TreeMap<>();
+    private final TreeMap<Integer, Integer> map = new TreeMap<>();
+    private List<HashFunction> rehashFunctions = new ArrayList<>();
+    private Random random = new Random();
 
     //Initialize map with replicas 
     public ServerDecider(){
@@ -23,6 +29,9 @@ public class ServerDecider {
                 count++;
             }
         }
+        for(Integer i = 0; i < NUM_SERVERS; i++){
+            rehashFunctions.add(Hashing.hmacMd5(i.toString().getBytes()));
+        }
     } 
 
     public int hash(AlgorithmType algorithmType, Task task, WorkerInfo[] workerInfos, BlockingQueue<Task>[] queues){
@@ -31,6 +40,7 @@ public class ServerDecider {
             case MODULO : out = moduloHash(task); break;
             case CONSISTENT : out = consistentHash(task); break;
             case BOUNDED_LOAD : out = boundedLoad(task, workerInfos, queues); break;
+            case REHASH : out = rehash(task, queues); break;
             default : throw new RuntimeException(String.format("Algorithm Type %s, did not match any configured type", algorithmType));
         }
         return out;
@@ -74,5 +84,21 @@ public class ServerDecider {
         }
         //in case we went all the way around and did not find a server (should be impossible)
         return map.get(tailMap.firstKey());
+    }
+
+    /*
+    * Like bounded loads however instead of going around the cirlce to find next element
+    * rehash to a random element and then check again 
+    */
+    private int rehash(Task task, BlockingQueue<Task>[] queues){
+        for(int i=0; i < NUM_SERVERS; i++){
+            int hash = rehashFunctions.get(i).hashBytes(task.getId().toString().getBytes()).asInt();
+            Entry<Integer, Integer> entry = map.ceilingEntry(hash);
+            int server = entry == null ? map.floorEntry(hash).getValue() : entry.getValue();
+            if(queues[server].size() <= (1+EPSILON)*((double)BATCH_SIZE/NUM_SERVERS)){
+                return server;
+            }
+        }
+        return random.nextInt(NUM_SERVERS); //default to random server if everything is full
     }
 }

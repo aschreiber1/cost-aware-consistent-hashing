@@ -32,6 +32,12 @@ public class ControllerTest {
     }
 
     @Test
+    public void normalRehashTest() throws InterruptedException{
+        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL, AlgorithmType.REHASH);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
     public void zipfTest() throws InterruptedException{
         ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.MODULO);
         assertTrue(experimentResults.getTotalTime() > 0);
