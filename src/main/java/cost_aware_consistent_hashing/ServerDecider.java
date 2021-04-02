@@ -55,20 +55,24 @@ public class ServerDecider {
 
     /*
     * Implement Consistent Hashing with Bounded Load
-    *
+    * Use constant Epsilon, to make sure that load per server is less than (1+eplsilon) the average load
     */
     private int boundedLoad(Task task, WorkerInfo[] workerInfos, BlockingQueue<Task>[] queues){
         int hash = hashFunction.hashBytes(task.getId().toString().getBytes()).asInt();
         SortedMap<Integer, Integer> tailMap = map.tailMap(hash);
-        tailMap = tailMap.isEmpty() ? map : tailMap;
         for(Map.Entry<Integer, Integer> entry : tailMap.entrySet()){
             int server = entry.getValue();
-            //if size of the queue is bigger less than 1+eplisilon average load, add value
-            int serverSize = queues[server].size();
-            if(serverSize <= (1+EPSILON)*((double)BATCH_SIZE/NUM_SERVERS)){
+            if(queues[server].size() <= (1+EPSILON)*((double)BATCH_SIZE/NUM_SERVERS)){
                 return server;
             }
         }
-        return tailMap.get(tailMap.firstKey());
+        for(Map.Entry<Integer, Integer> entry : map.entrySet()){
+            int server = entry.getValue();
+            if(queues[server].size() <= (1+EPSILON)*((double)BATCH_SIZE/NUM_SERVERS)){
+                return server;
+            }
+        }
+        //in case we went all the way around and did not find a server (should be impossible)
+        return map.get(tailMap.firstKey());
     }
 }

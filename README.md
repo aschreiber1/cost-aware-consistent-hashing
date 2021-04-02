@@ -11,5 +11,7 @@ DataGenerator.java contains a bunch of functions for gernetating different data 
 Controller.java should be responsible for perodically pulling a new batch of objects of the task queue, and sending them to the appropriate thread based on the Task ID (in the base implementation). The controller will also be programmed with some adjustments to better handle varrying loads.
 ### Workers
 Workers should follow a simple, read from my task queue, sleep for the cost on the task, cycle. 
+### ServerDecider
+This is where the various algorithms are that decide which server to map a task to given the current state of the systems. Types are listed in AlgorithmType
 ### App
 App.java should be responsible for running the experiments, gathering metrics and summarizing the data
