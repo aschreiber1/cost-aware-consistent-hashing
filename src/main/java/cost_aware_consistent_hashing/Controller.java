@@ -21,7 +21,7 @@ public class Controller {
 
         for(int i=0; i < NUM_SERVERS; i++){
             workerInfos[i] = new WorkerInfo();
-            queues[i] = new ArrayBlockingQueue<>(BATCH_SIZE);
+            queues[i] = new ArrayBlockingQueue<>(NUM_TASKS);
             new Thread(new Worker(queues[i], workerInfos[i])).start();
         }
 
@@ -37,21 +37,20 @@ public class Controller {
                 queues[serverNum].add(task);
             }
             //wait for all queues to be cleared
+            long batchStart = System.currentTimeMillis();
             while(true){
-                boolean allQueuesCleared = true;
-                for(BlockingQueue<Task> queue : queues){
-                    if(!queue.isEmpty()){
-                        allQueuesCleared = false;
-                        break;
-                    }
-                }
-                if(allQueuesCleared){
+                if(!pendingTasks(queues) || System.currentTimeMillis() - batchStart > BATCH_TIME){
                     break;
                 }
-                Thread.sleep(1L); //backoff 
+                Thread.sleep(5L); //backoff 
             }
         }
-
+        while(true){
+            if(!pendingTasks(queues)){
+                break;
+            }
+            Thread.sleep(5L); //backoff 
+        }
         final long endTime = System.currentTimeMillis();
 
         results.setDataSetType(dataSetType);
@@ -60,5 +59,16 @@ public class Controller {
         System.out.println(String.format("Experiment with Dataset Type %s took %d", dataSetType, endTime-startTime));
 
         return results;
+    }
+
+    private boolean pendingTasks(BlockingQueue<Task>[] queues){
+        boolean pendingTasks = false;
+        for(BlockingQueue<Task> queue : queues){
+            if(!queue.isEmpty()){
+                pendingTasks = true;
+                break;
+            }
+        }
+        return pendingTasks;
     }
 }
