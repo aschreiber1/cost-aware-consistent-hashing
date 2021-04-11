@@ -1,7 +1,7 @@
 package cost_aware_consistent_hashing;
 
 /**
- * Hello world!
+ * Currently unused but logic to run all the experiments and save the results could go here
  *
  */
 public class App 

@@ -15,6 +15,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 
 public class ServerDecider {
+    //use the MD5 hash function for consistent hashing as it "mixes" well
     final HashFunction hashFunction = Hashing.hmacMd5("myKey".getBytes());
     private final TreeMap<Integer, Integer> map = new TreeMap<>();
     private List<HashFunction> rehashFunctions = new ArrayList<>();
@@ -23,12 +24,14 @@ public class ServerDecider {
     //Initialize map with replicas 
     public ServerDecider(){
         int count = 0;
+        //map servers into the treemap so that we can use them in consistent hashing
         for(int i = 0; i < NUM_SERVERS; i++){
             for(int j = 0; j < NUM_REPLICAS; j++){
                 map.put(hashFunction.hashLong(count).asInt(), i);
                 count++;
             }
         }
+        //add rehash functions for our rehash function strategy 
         for(Integer i = 0; i < NUM_SERVERS; i++){
             rehashFunctions.add(Hashing.hmacMd5(i.toString().getBytes()));
         }
@@ -46,13 +49,16 @@ public class ServerDecider {
         return out;
     }
     
+    //Basic Algos 101 modulus hash
     private int moduloHash(Task task){
         return Math.abs(task.getId().hashCode()) % NUM_SERVERS;
     }
 
     /*
-    * Use a tree map to get a sorted order of the elements (imagine a circle)
-    * Map the task to a point on the cirlce and then find the next largest
+    Use a tree map to get a sorted order of the servers (imagine the servers being circle)
+    Map the task to a point on the cirlce and then find the server that is closet, but larger to 
+    the hash. The key thing here is we are using the same hash function to map both the servers
+    and the tasks to the cirlce. 
     */
     private int consistentHash(Task task){
         int hash = hashFunction.hashBytes(task.getId().toString().getBytes()).asInt();

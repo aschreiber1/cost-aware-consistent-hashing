@@ -10,6 +10,12 @@ import java.util.concurrent.BlockingQueue;
 public class Controller {
     DataGenerator dataGenerator = new DataGenerator();
     
+    /*
+    For a given dataset and algorithm run the experiment
+    This means take the dataset, in batches publish it to the worker threads,
+    have the threads sleep for the cost of each task
+    and then publish time it took to run the experiment
+    */
     public ExperimentResults runExperiment(DataSetType dataSetType, AlgorithmType algorithmType) throws InterruptedException{
         System.out.println(String.format("Starting Experiment with Dataset Type %s", dataSetType));
         ExperimentResults results = new ExperimentResults();
@@ -19,6 +25,7 @@ public class Controller {
         WorkerInfo[] workerInfos = new WorkerInfo[NUM_SERVERS];
         BlockingQueue<Task>[] queues = new ArrayBlockingQueue[NUM_SERVERS];
 
+        //Start the worker threads
         for(int i=0; i < NUM_SERVERS; i++){
             workerInfos[i] = new WorkerInfo();
             queues[i] = new ArrayBlockingQueue<>(NUM_TASKS);
@@ -39,12 +46,15 @@ public class Controller {
             //wait for all queues to be cleared
             long batchStart = System.currentTimeMillis();
             while(true){
+                //if no workers have tasks yet, or if the batch has taken longer than BATCH_TIME
+                //move on and start publihsing the tasks of the next batch
                 if(!pendingTasks(queues) || System.currentTimeMillis() - batchStart > BATCH_TIME){
                     break;
                 }
                 Thread.sleep(5L); //backoff 
             }
         }
+        //make sure all the tasks are drained before ending the expierment
         while(true){
             if(!pendingTasks(queues)){
                 break;
@@ -61,6 +71,7 @@ public class Controller {
         return results;
     }
 
+    //Check if all of the workers have drained all their tasks
     private boolean pendingTasks(BlockingQueue<Task>[] queues){
         boolean pendingTasks = false;
         for(BlockingQueue<Task> queue : queues){

@@ -5,6 +5,7 @@ import lombok.Setter;
 
 /**
  * Contains the summary results per experment
+ * We should add extra metrics here that would be interesting 
  */
 
 @Getter
