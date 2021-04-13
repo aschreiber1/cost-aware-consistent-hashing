@@ -27,7 +27,7 @@ public class DataGenerator {
         return dataset;
     }
 
-    //genreate normal distribution by sampling from a normal distribution
+    //genreate normal distribution by sampling from a normal distribution 
     private DataSet normalDataSet(){
         //create normal distribution with mean .05 and sd .05/3 so that 99.7% of events are < .1
         NormalDistribution normalDistribution = new NormalDistribution(50, 50/3D);

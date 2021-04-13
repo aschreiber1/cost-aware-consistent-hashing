@@ -32,6 +32,7 @@ public class Worker implements Runnable {
         try {
             while (true) {
                 Task task = queue.take();
+                task.setDequeuedTime(System.currentTimeMillis());
                 if (task.getCost().equals(STOP_WORKER)) {
                     return;
                 }
@@ -41,8 +42,8 @@ public class Worker implements Runnable {
                 }
                 else{
                     Thread.sleep((long)(task.getCost()*(1-CACHE_EFFECTIVENESS)));
-
                 }
+                task.setFinishTime(System.currentTimeMillis());
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -3,12 +3,19 @@ package cost_aware_consistent_hashing;
 import lombok.Getter;
 import static cost_aware_consistent_hashing.Constants.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.stream.Collectors;
+
+import com.google.common.math.Quantiles;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 @Getter
 public class Controller {
     DataGenerator dataGenerator = new DataGenerator();
+    private int maxLoadDiff;
     
     /*
     For a given dataset and algorithm run the experiment
@@ -21,6 +28,7 @@ public class Controller {
         ExperimentResults results = new ExperimentResults();
         DataSet dataSet = dataGenerator.getDataset(dataSetType);
         ServerDecider serverDecider = new ServerDecider();
+        maxLoadDiff = Integer.MIN_VALUE;
 
         WorkerInfo[] workerInfos = new WorkerInfo[NUM_SERVERS];
         BlockingQueue<Task>[] queues = new ArrayBlockingQueue[NUM_SERVERS];
@@ -39,8 +47,9 @@ public class Controller {
             System.out.println(String.format("Working on Batch %d of %d", i, numBatches));
             //publish batch of tasks to appropriate queues
             for(int j = 0; j < BATCH_SIZE; j++){
-                Task task = dataSet.getTasks().removeFirst();
+                Task task = dataSet.getTasks().get(BATCH_SIZE*i + j);
                 int serverNum = serverDecider.hash(algorithmType, task, workerInfos, queues);
+                task.setStartTime(System.currentTimeMillis());
                 queues[serverNum].add(task);
             }
             //wait for all queues to be cleared
@@ -59,27 +68,53 @@ public class Controller {
             if(!pendingTasks(queues)){
                 break;
             }
-            Thread.sleep(5L); //backoff 
+            Thread.sleep(1L); //backoff 
         }
         final long endTime = System.currentTimeMillis();
 
+        //Make objects so that we can get easy summary statistics
+        DescriptiveStatistics costsStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getCost).mapToDouble(d -> d).toArray());
+        DescriptiveStatistics elapsedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getElapsed).mapToDouble(d -> d).toArray());
+        DescriptiveStatistics queuedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getQueuedTime).mapToDouble(d -> d).toArray());
+
+        //add in summary statistics to the results
         results.setDataSetType(dataSetType);
         results.setTotalTime(endTime-startTime);
+        results.setCostVariance(costsStats.getVariance());
+        results.setCostKurtosis(costsStats.getKurtosis());
+        results.setCostsPercentiles(percentiles(costsStats));
+        results.setLatencyPercentiles(percentiles(elapsedStats));
+        results.setQueuedPercentiles(percentiles(queuedStats));
+        results.setMaxLoadDiff(maxLoadDiff);
 
-        System.out.println(String.format("Experiment with Dataset Type %s took %d", dataSetType, endTime-startTime));
-
+        System.out.println(String.format("Experiment with Dataset Type %s, Algorithm Type %s, took %d", dataSetType, algorithmType, endTime-startTime));
+        System.out.println(results.toString());
         return results;
     }
 
     //Check if all of the workers have drained all their tasks
     private boolean pendingTasks(BlockingQueue<Task>[] queues){
         boolean pendingTasks = false;
+        int minRequests = Integer.MAX_VALUE;
+        int maxRequests = Integer.MIN_VALUE;
         for(BlockingQueue<Task> queue : queues){
-            if(!queue.isEmpty()){
+            int size = queue.size();
+            minRequests = Math.min(size, minRequests);
+            maxRequests = Math.max(size, maxRequests);
+            if(size != 0){
                 pendingTasks = true;
-                break;
             }
         }
+        maxLoadDiff = Math.max(maxLoadDiff, maxRequests-minRequests);
         return pendingTasks;
+    }
+
+    private Map<Integer, Double> percentiles(DescriptiveStatistics desc){
+        return Map.of(
+            25,  desc.getPercentile(25),
+            50,  desc.getPercentile(50),
+            75,  desc.getPercentile(75),
+            100, desc.getPercentile(100)
+        );
     }
 }
