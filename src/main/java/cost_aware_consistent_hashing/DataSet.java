@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 //Here a datasets is just a queue of tasks to be done
 public class DataSet {
+    DataSetType type;
     //Queue of tasks
     private List<Task> tasks = new ArrayList<>();
 }

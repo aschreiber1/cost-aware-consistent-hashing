@@ -3,13 +3,10 @@ package cost_aware_consistent_hashing;
 import lombok.Getter;
 import static cost_aware_consistent_hashing.Constants.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.stream.Collectors;
 
-import com.google.common.math.Quantiles;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 @Getter
@@ -23,10 +20,9 @@ public class Controller {
     have the threads sleep for the cost of each task
     and then publish time it took to run the experiment
     */
-    public ExperimentResults runExperiment(DataSetType dataSetType, AlgorithmType algorithmType) throws InterruptedException{
-        System.out.println(String.format("Starting Experiment with Dataset Type %s", dataSetType));
+    public ExperimentResults runExperiment(DataSet dataSet, AlgorithmType algorithmType) throws InterruptedException{
+        System.out.println(String.format("Starting Experiment with Dataset Type %s", dataSet.getType()));
         ExperimentResults results = new ExperimentResults();
-        DataSet dataSet = dataGenerator.getDataset(dataSetType);
         ServerDecider serverDecider = new ServerDecider();
         maxLoadDiff = Integer.MIN_VALUE;
 
@@ -78,7 +74,7 @@ public class Controller {
         DescriptiveStatistics queuedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getQueuedTime).mapToDouble(d -> d).toArray());
 
         //add in summary statistics to the results
-        results.setDataSetType(dataSetType);
+        results.setDataSetType(dataSet.getType());
         results.setTotalTime(endTime-startTime);
         results.setCostVariance(costsStats.getVariance());
         results.setCostKurtosis(costsStats.getKurtosis());
@@ -87,7 +83,7 @@ public class Controller {
         results.setQueuedPercentiles(percentiles(queuedStats));
         results.setMaxLoadDiff(maxLoadDiff);
 
-        System.out.println(String.format("Experiment with Dataset Type %s, Algorithm Type %s, took %d", dataSetType, algorithmType, endTime-startTime));
+        System.out.println(String.format("Experiment with Dataset Type %s, Algorithm Type %s, took %d", dataSet.getType(), algorithmType, endTime-startTime));
         System.out.println(results.toString());
         return results;
     }

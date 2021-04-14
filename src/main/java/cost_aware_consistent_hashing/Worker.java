@@ -1,6 +1,5 @@
 package cost_aware_consistent_hashing;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;

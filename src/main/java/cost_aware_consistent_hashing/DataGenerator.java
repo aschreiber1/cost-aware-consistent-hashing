@@ -23,6 +23,7 @@ public class DataGenerator {
             case ZIPF: dataset = zipfDataSet(); break;
             default: throw new RuntimeException(String.format("Dataset Type %s, did not match any configured type", dataSetType));
         }
+        dataset.setType(dataSetType);
 
         return dataset;
     }

@@ -6,52 +6,61 @@ import org.junit.Test;
 
 public class ControllerTest {
     private Controller controller = new Controller();
+    private DataGenerator generator = new DataGenerator();
     
     @Test
     public void uniformTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.UNIFORM, AlgorithmType.MODULO);
+        DataSet dataSet = generator.getDataset(DataSetType.UNIFORM);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MODULO);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
     @Test
     public void normalTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL, AlgorithmType.MODULO);
+        DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MODULO);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
     @Test
     public void normalConsitentTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL, AlgorithmType.CONSISTENT);
+        DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.CONSISTENT);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
     @Test
     public void normalBoundedLoadTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL, AlgorithmType.BOUNDED_LOAD);
+        DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_LOAD);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
     @Test
     public void normalRehashTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.NORMAL, AlgorithmType.REHASH);
+        DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.REHASH);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
     @Test
     public void zipfConsistentTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.CONSISTENT);
+        DataSet dataSet = generator.getDataset(DataSetType.ZIPF);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.CONSISTENT);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
     @Test
     public void zipfBoundedTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.BOUNDED_LOAD);
+        DataSet dataSet = generator.getDataset(DataSetType.ZIPF);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_LOAD);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
     @Test
     public void zipfRehashTest() throws InterruptedException{
-        ExperimentResults experimentResults = controller.runExperiment(DataSetType.ZIPF, AlgorithmType.REHASH);
+        DataSet dataSet = generator.getDataset(DataSetType.ZIPF);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.REHASH);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 }
