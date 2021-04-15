@@ -88,8 +88,8 @@ public class ServerDecider {
                 return server;
             }
         }
-        //in case we went all the way around and did not find a server (should be impossible)
-        return map.get(tailMap.firstKey());
+        hash = tailMap.isEmpty() ? map.firstKey() : tailMap.firstKey();
+        return map.get(hash);
     }
 
     /*
