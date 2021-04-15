@@ -40,7 +40,7 @@ public class Controller {
 
         int numBatches = NUM_TASKS/BATCH_SIZE;
         for(int i=0; i < numBatches; i++){
-            System.out.println(String.format("Working on Batch %d of %d", i, numBatches));
+            System.out.println(String.format("Working on Batch %d of %d", i+1, numBatches));
             //publish batch of tasks to appropriate queues
             for(int j = 0; j < BATCH_SIZE; j++){
                 Task task = dataSet.getTasks().get(BATCH_SIZE*i + j);
@@ -70,15 +70,22 @@ public class Controller {
 
         //Make objects so that we can get easy summary statistics
         DescriptiveStatistics costsStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getCost).mapToDouble(d -> d).toArray());
-        DescriptiveStatistics elapsedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getElapsed).mapToDouble(d -> d).toArray());
         DescriptiveStatistics queuedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getQueuedTime).mapToDouble(d -> d).toArray());
 
+        DescriptiveStatistics elapsedStats;
+        try{
+            elapsedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getElapsed).mapToDouble(d -> d).toArray());
+        }
+        catch(NullPointerException e){
+            Thread.sleep(5000L); //Sleep for 5 seconds in case a task is still sleeping on a worker
+            elapsedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getElapsed).mapToDouble(d -> d).toArray());
+        }
         int maxJobs = Integer.MIN_VALUE;
         int minJobs = Integer.MAX_VALUE;
         for(WorkerInfo workerInfo : workerInfos){
             int numJobs = workerInfo.getNumJobs();
             minJobs = Math.min(minJobs, numJobs);
-            maxJobs = Math.min(maxJobs, numJobs);
+            maxJobs = Math.max(maxJobs, numJobs);
             System.out.println(String.format("Num Jobs: %s", numJobs));
         }
    
