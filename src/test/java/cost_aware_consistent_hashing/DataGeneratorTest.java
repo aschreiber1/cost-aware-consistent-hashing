@@ -33,4 +33,10 @@ public class DataGeneratorTest {
         DataSet dataSet = dataGenerator.getDataset(DataSetType.ZIPF);
         assertEquals(NUM_TASKS, dataSet.getTasks().size());
     }
+
+    @Test
+    public void testConstant(){
+        DataSet dataSet = dataGenerator.getDataset(DataSetType.CONSTANT);
+        assertEquals(NUM_TASKS, dataSet.getTasks().size());
+    }
 }

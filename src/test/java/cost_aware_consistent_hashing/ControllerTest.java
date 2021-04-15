@@ -63,4 +63,18 @@ public class ControllerTest {
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.REHASH);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
+
+    @Test
+    public void constantConsistentTest() throws InterruptedException{
+        DataSet dataSet = generator.getDataset(DataSetType.CONSTANT);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.CONSISTENT);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void constantBoundedLoadTest() throws InterruptedException{
+        DataSet dataSet = generator.getDataset(DataSetType.CONSTANT);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_LOAD);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
 }

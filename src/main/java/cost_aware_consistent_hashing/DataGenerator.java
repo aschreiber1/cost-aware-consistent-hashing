@@ -2,6 +2,7 @@ package cost_aware_consistent_hashing;
 
 import static cost_aware_consistent_hashing.Constants.*;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ public class DataGenerator {
         DataSet dataset;
 
         switch(dataSetType){
+            case CONSTANT: dataset = constantDataSet(); break;
             case NORMAL: dataset = normalDataSet(); break;
             case UNIFORM: dataset = uniformDataSet(); break;
             case CAUCHY: dataset = caucyDataSet(); break;
@@ -93,6 +95,23 @@ public class DataGenerator {
             tasks[i] = new Task(cost, uuid);
         }
         //generate task multiplities from sampling from uniform distribution
+        for(int i=0; i < NUM_TASKS; i++){
+            dataSet.getTasks().add(tasks[random.nextInt(NUM_DISTINCT_TASKS)]);
+        }
+        return dataSet;
+    }
+
+    /**
+     * Dataset with all 50 mills time, i.e. dataset like what was discussed in the paper
+     */
+    private DataSet constantDataSet(){
+        DataSet dataSet = new DataSet();
+        Task[] tasks = new Task[NUM_DISTINCT_TASKS];
+        //generate taks with all 50 mills
+        for(int i=0; i < NUM_DISTINCT_TASKS; i++){
+            UUID uuid = UUID.randomUUID();
+            tasks[i] = new Task(50L, uuid);
+        }
         for(int i=0; i < NUM_TASKS; i++){
             dataSet.getTasks().add(tasks[random.nextInt(NUM_DISTINCT_TASKS)]);
         }
