@@ -21,7 +21,7 @@ public class Controller {
     and then publish time it took to run the experiment
     */
     public ExperimentResults runExperiment(DataSet dataSet, AlgorithmType algorithmType) throws InterruptedException{
-        System.out.println(String.format("Starting Experiment with Dataset Type %s", dataSet.getType()));
+        System.out.println(String.format("Starting Experiment with Dataset Type %s, Algorithm Type %s", dataSet.getType(), algorithmType));
         ExperimentResults results = new ExperimentResults();
         ServerDecider serverDecider = new ServerDecider();
         maxLoadDiff = Integer.MIN_VALUE;
@@ -75,6 +75,7 @@ public class Controller {
 
         //add in summary statistics to the results
         results.setDataSetType(dataSet.getType());
+        results.setAlgorithmType(algorithmType);
         results.setTotalTime(endTime-startTime);
         results.setCostVariance(costsStats.getVariance());
         results.setCostKurtosis(costsStats.getKurtosis());
