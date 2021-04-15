@@ -17,7 +17,7 @@ import static cost_aware_consistent_hashing.Constants.*;
 public class App 
 {
     private static final String[] HEADERS = {"dataSetType", "algorithm", "totalTime",
-        "maxLoadDiff", "costKurtosis", "costVariance", "latency_p25", "latency_p50", "latency_p75",
+        "maxLoadDiff", "maxJobsDiff", "costKurtosis", "costVariance", "latency_p25", "latency_p50", "latency_p75",
         "latency_p100", "cost_p25", "cost_p50", "cost_p75", "cost_p100", "queued_p25", "queued_p50",
         "queued_p75", "queued_p100" };
 
@@ -51,7 +51,7 @@ public class App
         try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS))) {
             for(ExperimentResults result : results){
                 printer.printRecord(result.getDataSetType(), result.getAlgorithmType(), result.getTotalTime(), 
-                result.getMaxLoadDiff(), result.getCostKurtosis(), result.getCostVariance(),
+                result.getMaxLoadDiff(), result.getMaxJobsDiff(), result.getCostKurtosis(), result.getCostVariance(),
                 result.getLatencyPercentiles().get(25), result.getLatencyPercentiles().get(50),
                 result.getLatencyPercentiles().get(75),result.getLatencyPercentiles().get(100),
                 result.getCostsPercentiles().get(25), result.getCostsPercentiles().get(50),

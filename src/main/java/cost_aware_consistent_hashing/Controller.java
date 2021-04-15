@@ -73,6 +73,16 @@ public class Controller {
         DescriptiveStatistics elapsedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getElapsed).mapToDouble(d -> d).toArray());
         DescriptiveStatistics queuedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getQueuedTime).mapToDouble(d -> d).toArray());
 
+        int maxJobs = Integer.MIN_VALUE;
+        int minJobs = Integer.MAX_VALUE;
+        for(WorkerInfo workerInfo : workerInfos){
+            int numJobs = workerInfo.getNumJobs();
+            minJobs = Math.min(minJobs, numJobs);
+            maxJobs = Math.min(maxJobs, numJobs);
+            System.out.println(String.format("Num Jobs: %s", numJobs));
+        }
+   
+
         //add in summary statistics to the results
         results.setDataSetType(dataSet.getType());
         results.setAlgorithmType(algorithmType);
@@ -83,6 +93,11 @@ public class Controller {
         results.setLatencyPercentiles(percentiles(elapsedStats));
         results.setQueuedPercentiles(percentiles(queuedStats));
         results.setMaxLoadDiff(maxLoadDiff);
+        results.setMaxJobsDiff(maxJobs-minJobs);
+
+        for(WorkerInfo workerInfo : workerInfos){
+            System.out.println(String.format("Num Jobs: %s", workerInfo.getNumJobs()));
+        }
 
         System.out.println(String.format("Experiment with Dataset Type %s, Algorithm Type %s, took %d", dataSet.getType(), algorithmType, endTime-startTime));
         System.out.println(results.toString());

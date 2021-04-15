@@ -11,5 +11,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class WorkerInfo {
-    
+    private int numJobs = 0;
+
+    public void incrementCount(){
+        numJobs++;
+    }
 }

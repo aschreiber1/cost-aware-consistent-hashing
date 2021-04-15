@@ -43,6 +43,7 @@ public class Worker implements Runnable {
                     Thread.sleep((long)(task.getCost()*(1-CACHE_EFFECTIVENESS)));
                 }
                 task.setFinishTime(System.currentTimeMillis());
+                workerInfo.incrementCount();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
