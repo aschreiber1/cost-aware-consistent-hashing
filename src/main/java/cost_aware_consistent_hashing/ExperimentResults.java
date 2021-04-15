@@ -17,6 +17,7 @@ import lombok.ToString;
 public class ExperimentResults {
     private DataSetType dataSetType;
     private AlgorithmType algorithmType;
+    private Double cacheEffectivness;
     private Double costVariance;
     private Double costKurtosis;
     private Long totalTime; // number of milliseconds for experiment

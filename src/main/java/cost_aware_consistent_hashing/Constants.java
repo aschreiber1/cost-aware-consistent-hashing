@@ -23,8 +23,6 @@ public final class Constants {
     //In consistent hasing we generally dont just map the servers in a circle but instead insert duplicates as well
     //this improves even load and scaling behaivor 
     public static final int NUM_REPLICAS = 5;
-    //how effective is cache, in percentage reduction in total task time 
-    public static final Double CACHE_EFFECTIVENESS = .75;
     //number of times to run each experiment
     public static final int NUM_EXPERIMENTS = 5; 
 

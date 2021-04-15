@@ -13,10 +13,12 @@ public class Worker implements Runnable {
     private BlockingQueue<Task> queue;
     private WorkerInfo workerInfo;
     private HashSet<UUID> cache = new HashSet<>();
+    private final Double CACHE_EFFECTIVENESS;
     
-    public Worker(BlockingQueue<Task> queue, WorkerInfo workerInfo) {
+    public Worker(BlockingQueue<Task> queue, WorkerInfo workerInfo, Double cacheEffectiveness) {
         this.queue = queue;
         this.workerInfo = workerInfo;
+        this.CACHE_EFFECTIVENESS = cacheEffectiveness;
     }
     /**
      * Workers have a simple life cycle. While they are running repeate the following steps
@@ -40,7 +42,7 @@ public class Worker implements Runnable {
                     cache.add(task.getId());
                 }
                 else{
-                    Thread.sleep((long)(task.getCost()*(1-CACHE_EFFECTIVENESS)));
+                    Thread.sleep((long)(task.getCost()*(1-this.CACHE_EFFECTIVENESS)));
                 }
                 task.setFinishTime(System.currentTimeMillis());
                 workerInfo.incrementCount();

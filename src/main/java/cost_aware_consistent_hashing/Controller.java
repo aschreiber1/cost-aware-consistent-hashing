@@ -20,7 +20,8 @@ public class Controller {
     have the threads sleep for the cost of each task
     and then publish time it took to run the experiment
     */
-    public ExperimentResults runExperiment(DataSet dataSet, AlgorithmType algorithmType) throws InterruptedException{
+    public ExperimentResults runExperiment(DataSet dataSet, AlgorithmType algorithmType,
+        Double cacheEffectivness) throws InterruptedException{
         System.out.println(String.format("Starting Experiment with Dataset Type %s, Algorithm Type %s", dataSet.getType(), algorithmType));
         ExperimentResults results = new ExperimentResults();
         ServerDecider serverDecider = new ServerDecider();
@@ -33,7 +34,7 @@ public class Controller {
         for(int i=0; i < NUM_SERVERS; i++){
             workerInfos[i] = new WorkerInfo();
             queues[i] = new ArrayBlockingQueue<>(NUM_TASKS);
-            new Thread(new Worker(queues[i], workerInfos[i])).start();
+            new Thread(new Worker(queues[i], workerInfos[i], cacheEffectivness)).start();
         }
 
         final long startTime = System.currentTimeMillis();
@@ -93,6 +94,7 @@ public class Controller {
         //add in summary statistics to the results
         results.setDataSetType(dataSet.getType());
         results.setAlgorithmType(algorithmType);
+        results.setCacheEffectivness(cacheEffectivness);
         results.setTotalTime(endTime-startTime);
         results.setCostVariance(costsStats.getVariance());
         results.setCostKurtosis(costsStats.getKurtosis());
