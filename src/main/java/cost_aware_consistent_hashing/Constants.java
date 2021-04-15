@@ -26,6 +26,6 @@ public final class Constants {
     //how effective is cache, in percentage reduction in total task time 
     public static final Double CACHE_EFFECTIVENESS = .75;
     //number of times to run each experiment
-    public static final int NUM_EXPERIMENTS = 1; 
+    public static final int NUM_EXPERIMENTS = 5; 
 
 }
