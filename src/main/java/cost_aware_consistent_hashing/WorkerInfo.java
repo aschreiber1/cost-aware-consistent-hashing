@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class WorkerInfo {
     private int numJobs = 0;
+    private Double averageElapsed = 0D;
 
     public void incrementCount(){
         numJobs++;
