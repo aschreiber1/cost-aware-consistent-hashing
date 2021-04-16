@@ -42,6 +42,11 @@ public class Controller {
         int numBatches = NUM_TASKS/BATCH_SIZE;
         for(int i=0; i < numBatches; i++){
             System.out.println(String.format("Working on Batch %d of %d", i+1, numBatches));
+            if((i+1) % 10 == 0){
+                for(WorkerInfo workerInfo : workerInfos){
+                    System.out.println(workerInfo.getAverageElapsed());
+                }
+            }
             //publish batch of tasks to appropriate queues
             for(int j = 0; j < BATCH_SIZE; j++){
                 Task task = dataSet.getTasks().get(BATCH_SIZE*i + j);
@@ -90,7 +95,6 @@ public class Controller {
             System.out.println(String.format("Num Jobs: %s", numJobs));
         }
    
-
         //add in summary statistics to the results
         results.setDataSetType(dataSet.getType());
         results.setAlgorithmType(algorithmType);
@@ -103,10 +107,6 @@ public class Controller {
         results.setQueuedPercentiles(percentiles(queuedStats));
         results.setMaxLoadDiff(maxLoadDiff);
         results.setMaxJobsDiff(maxJobs-minJobs);
-
-        for(WorkerInfo workerInfo : workerInfos){
-            System.out.println(String.format("Num Jobs: %s", workerInfo.getNumJobs()));
-        }
 
         System.out.println(String.format("Experiment with Dataset Type %s, Algorithm Type %s, took %d", dataSet.getType(), algorithmType, endTime-startTime));
         System.out.println(results.toString());

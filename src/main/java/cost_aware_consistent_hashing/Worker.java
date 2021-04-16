@@ -1,6 +1,5 @@
 package cost_aware_consistent_hashing;
 
-import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -15,8 +14,6 @@ public class Worker implements Runnable {
     private WorkerInfo workerInfo;
     private HashSet<UUID> cache = new HashSet<>();
     private final Double CACHE_EFFECTIVENESS;
-    private double totalElapsed = 0;
-    private ArrayDeque<Double> elapsedQueue = new ArrayDeque<>();
     
     public Worker(BlockingQueue<Task> queue, WorkerInfo workerInfo, Double cacheEffectiveness) {
         this.queue = queue;
@@ -48,12 +45,7 @@ public class Worker implements Runnable {
                     Thread.sleep((long)(task.getCost()*(1-this.CACHE_EFFECTIVENESS)));
                 }
                 task.setFinishTime(System.currentTimeMillis());
-                if(elapsedQueue.size() > BATCH_SIZE){
-                    Double firstElement = elapsedQueue.removeFirst();
-                    totalElapsed -= firstElement;
-                }
-                totalElapsed += task.getElapsed();
-                workerInfo.setAverageElapsed(totalElapsed/elapsedQueue.size());
+                workerInfo.addCompletedTask(task);
                 workerInfo.incrementCount();
             }
         } catch (InterruptedException e) {

@@ -44,6 +44,13 @@ public class ControllerTest {
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
+    // @Test
+    // public void normalBoundedElapsed() throws InterruptedException{
+    //     DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
+    //     ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_ELAPSED, cacheEffectivness);
+    //     assertTrue(experimentResults.getTotalTime() > 0);
+    // }
+
     @Test
     public void zipfConsistentTest() throws InterruptedException{
         DataSet dataSet = generator.getDataset(DataSetType.ZIPF);

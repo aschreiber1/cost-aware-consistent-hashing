@@ -33,7 +33,7 @@ public class DataGenerator {
     //genreate normal distribution by sampling from a normal distribution 
     private DataSet normalDataSet(){
         //create normal distribution with mean .05 and sd .05/3 so that 99.7% of events are < .1
-        NormalDistribution normalDistribution = new NormalDistribution(50, 50/3D);
+        NormalDistribution normalDistribution = new NormalDistribution(TARGET_MEAN, 50/3D);
         DataSet dataSet = new DataSet();
         Task[] tasks = new Task[NUM_DISTINCT_TASKS];
         //generate costs from sampling from normal distribution
@@ -51,7 +51,7 @@ public class DataGenerator {
 
     private DataSet caucyDataSet(){
         //See https://keisan.casio.com/exec/system/1180573167 for what percentiles of this distribution look like
-        CauchyDistribution cauchyDistribution = new CauchyDistribution(50, 5);
+        CauchyDistribution cauchyDistribution = new CauchyDistribution(TARGET_MEAN, 5);
         DataSet dataSet = new DataSet();
         Task[] tasks = new Task[NUM_DISTINCT_TASKS];
         //generate costs from sampling from normal distribution
@@ -91,7 +91,8 @@ public class DataGenerator {
         //generate costs from sampling from unifrom distribution over (0,.1)
         for(int i=0; i < NUM_DISTINCT_TASKS; i++){
             UUID uuid = UUID.randomUUID();
-            Long cost = (long) random.nextInt(101);
+            Long upperBound = TARGET_MEAN*2+1;
+            Long cost = (long) random.nextInt(upperBound.intValue());
             tasks[i] = new Task(cost, uuid);
         }
         //generate task multiplities from sampling from uniform distribution
@@ -110,7 +111,7 @@ public class DataGenerator {
         //generate taks with all 50 mills
         for(int i=0; i < NUM_DISTINCT_TASKS; i++){
             UUID uuid = UUID.randomUUID();
-            tasks[i] = new Task(50L, uuid);
+            tasks[i] = new Task(TARGET_MEAN, uuid);
         }
         for(int i=0; i < NUM_TASKS; i++){
             dataSet.getTasks().add(tasks[random.nextInt(NUM_DISTINCT_TASKS)]);

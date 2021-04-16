@@ -17,18 +17,16 @@ import com.google.common.hash.Hashing;
 public class ServerDecider {
     //use the MD5 hash function for consistent hashing as it "mixes" well
     final HashFunction hashFunction = Hashing.hmacMd5("myKey".getBytes());
-    private final TreeMap<Integer, Integer> map = new TreeMap<>();
+    private final TreeMap<String, Integer> map = new TreeMap<>();
     private List<HashFunction> rehashFunctions = new ArrayList<>();
     private Random random = new Random();
 
     //Initialize map with replicas 
     public ServerDecider(){
-        int count = 0;
         //map servers into the treemap so that we can use them in consistent hashing
         for(int i = 0; i < NUM_SERVERS; i++){
             for(int j = 0; j < NUM_REPLICAS; j++){
-                map.put(hashFunction.hashLong(count).asInt(), i);
-                count++;
+                map.put(hashFunction.hashInt(random.nextInt()).toString(), i);
             }
         }
         //add rehash functions for our rehash function strategy 
@@ -42,8 +40,9 @@ public class ServerDecider {
         switch(algorithmType){
             case MODULO : out = moduloHash(task); break;
             case CONSISTENT : out = consistentHash(task); break;
-            case BOUNDED_LOAD : out = boundedLoad(task, workerInfos, queues); break;
+            case BOUNDED_LOAD : out = boundedLoad(task, queues); break;
             case REHASH : out = rehash(task, queues); break;
+           // case BOUNDED_ELAPSED : out = boundedElapsed(task, workerInfos); break;
             default : throw new RuntimeException(String.format("Algorithm Type %s, did not match any configured type", algorithmType));
         }
         return out;
@@ -61,9 +60,9 @@ public class ServerDecider {
     and the tasks to the cirlce. 
     */
     private int consistentHash(Task task){
-        int hash = hashFunction.hashBytes(task.getId().toString().getBytes()).asInt();
+        String hash = hashFunction.hashBytes(task.getId().toString().getBytes()).toString();
         if(!map.containsKey(hash)){
-            SortedMap<Integer, Integer> tailMap = map.tailMap(hash);
+            SortedMap<String, Integer> tailMap = map.tailMap(hash);
             hash = tailMap.isEmpty() ? map.firstKey() : tailMap.firstKey();
         }
         return map.get(hash);
@@ -73,16 +72,16 @@ public class ServerDecider {
     * Implement Consistent Hashing with Bounded Load
     * Use constant Epsilon, to make sure that load per server is less than (1+eplsilon) the average load
     */
-    private int boundedLoad(Task task, WorkerInfo[] workerInfos, BlockingQueue<Task>[] queues){
-        int hash = hashFunction.hashBytes(task.getId().toString().getBytes()).asInt();
-        SortedMap<Integer, Integer> tailMap = map.tailMap(hash);
-        for(Map.Entry<Integer, Integer> entry : tailMap.entrySet()){
+    private int boundedLoad(Task task, BlockingQueue<Task>[] queues){
+        String hash = hashFunction.hashBytes(task.getId().toString().getBytes()).toString();
+        SortedMap<String, Integer> tailMap = map.tailMap(hash);
+        for(Map.Entry<String, Integer> entry : tailMap.entrySet()){
             int server = entry.getValue();
             if(queues[server].size() <= (1+EPSILON)*((double)BATCH_SIZE/NUM_SERVERS)){
                 return server;
             }
         }
-        for(Map.Entry<Integer, Integer> entry : map.entrySet()){
+        for(Map.Entry<String, Integer> entry : map.entrySet()){
             int server = entry.getValue();
             if(queues[server].size() <= (1+EPSILON)*((double)BATCH_SIZE/NUM_SERVERS)){
                 return server;
@@ -98,13 +97,46 @@ public class ServerDecider {
     */
     private int rehash(Task task, BlockingQueue<Task>[] queues){
         for(int i=0; i < NUM_SERVERS; i++){
-            int hash = rehashFunctions.get(i).hashBytes(task.getId().toString().getBytes()).asInt();
-            Entry<Integer, Integer> entry = map.ceilingEntry(hash);
+            String hash = rehashFunctions.get(i).hashBytes(task.getId().toString().getBytes()).toString();
+            Entry<String, Integer> entry = map.ceilingEntry(hash);
             int server = entry == null ? map.floorEntry(hash).getValue() : entry.getValue();
             if(queues[server].size() <= (1+EPSILON)*((double)BATCH_SIZE/NUM_SERVERS)){
                 return server;
             }
         }
         return random.nextInt(NUM_SERVERS); //default to random server if everything is full
+    }
+
+    /*
+    * Implement Consistent Hashing with Bounded Load, but bounded load on average elapsed instead of num jobs
+    * Use constant Epsilon, to make sure that load per server is less than (1+eplsilon) the average load
+    * in terms of elapsed
+    */
+    private int boundedElapsed(Task task, WorkerInfo[] workerInfos){
+        String hash = hashFunction.hashBytes(task.getId().toString().getBytes()).toString();
+        SortedMap<String, Integer> tailMap = map.tailMap(hash);
+        Double avgJobPerSev = ((double) BATCH_SIZE)/NUM_SERVERS;
+        Double allowedElapsed = (1+ELAPSED_EPLISION)*((double)TARGET_MEAN)*avgJobPerSev/2;
+        for(Map.Entry<String, Integer> entry : tailMap.entrySet()){
+            int server = entry.getValue();
+            Double avg = workerInfos[server].getAverageElapsed();
+            if(avg <= allowedElapsed){
+                return server;
+            }
+            else{
+                System.out.println("skipped");
+            }
+        }
+        for(Map.Entry<String, Integer> entry : map.entrySet()){
+            int server = entry.getValue();
+            if(workerInfos[server].getAverageElapsed() <= allowedElapsed){
+                return server;
+            }
+            else{
+               System.out.println("skipped");
+            }
+        }
+        hash = tailMap.isEmpty() ? map.firstKey() : tailMap.firstKey();
+        return map.get(hash);
     }
 }
