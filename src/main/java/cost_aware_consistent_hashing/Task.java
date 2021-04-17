@@ -17,13 +17,15 @@ public class Task {
     }
 
     //get time it took from when task was submitted until server was done processing
+    //multiply by 1000 so it returns in microseconds
     public Long getElapsed(){
-        return finishTime-startTime;
+        return (finishTime-startTime)/1000;
     }
 
     //get time it took from when task was submitted until server picked it up
+    //multiply by 1000 so it returns in microseconds
     public Long getQueuedTime(){
-        return dequeuedTime-startTime;
+        return (dequeuedTime-startTime)/1000;
     }
     
     //amount of time to sleep for, for each task

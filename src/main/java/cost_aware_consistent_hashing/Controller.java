@@ -51,18 +51,21 @@ public class Controller {
             for(int j = 0; j < BATCH_SIZE; j++){
                 Task task = dataSet.getTasks().get(BATCH_SIZE*i + j);
                 int serverNum = serverDecider.hash(algorithmType, task, workerInfos, queues);
-                task.setStartTime(System.currentTimeMillis());
+                task.setStartTime(System.nanoTime());
                 queues[serverNum].add(task);
             }
             //wait for all queues to be cleared
-            long batchStart = System.currentTimeMillis();
+            long batchStart = System.nanoTime();
             while(true){
                 //if no workers have tasks yet, or if the batch has taken longer than BATCH_TIME
                 //move on and start publihsing the tasks of the next batch
-                if(!pendingTasks(queues) || System.currentTimeMillis() - batchStart > BATCH_TIME){
+                if(System.nanoTime() - batchStart > BATCH_TIME*1000){
                     break;
                 }
-                Thread.sleep(5L); //backoff 
+                if(!pendingTasks(queues) ){
+                    break;
+                }
+               // Thread.sleep(5L); //backoff 
             }
         }
         //make sure all the tasks are drained before ending the expierment
@@ -70,7 +73,7 @@ public class Controller {
             if(!pendingTasks(queues)){
                 break;
             }
-            Thread.sleep(1L); //backoff 
+          //  Thread.sleep(1L); //backoff 
         }
         final long endTime = System.currentTimeMillis();
 
@@ -132,9 +135,13 @@ public class Controller {
 
     private Map<Integer, Double> percentiles(DescriptiveStatistics desc){
         return Map.of(
+            1,   desc.getPercentile(1),
+            10,  desc.getPercentile(10),
             25,  desc.getPercentile(25),
             50,  desc.getPercentile(50),
             75,  desc.getPercentile(75),
+            90,  desc.getPercentile(90),
+            99,  desc.getPercentile(99),
             100, desc.getPercentile(100)
         );
     }

@@ -3,6 +3,7 @@ package cost_aware_consistent_hashing;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.locks.LockSupport;
 
 import lombok.Getter;
 
@@ -33,18 +34,21 @@ public class Worker implements Runnable {
         try {
             while (true) {
                 Task task = queue.take();
-                task.setDequeuedTime(System.currentTimeMillis());
+                task.setDequeuedTime(System.nanoTime());
                 if (task.getCost().equals(STOP_WORKER)) {
                     return;
                 }
                 if(!cache.contains(task.getId())){
-                    Thread.sleep(task.getCost());
+                    LockSupport.parkNanos(task.getCost()*1000);
+                    //Thread.sleep(task.getCost());
                     cache.add(task.getId());
                 }
                 else{
-                    Thread.sleep((long)(task.getCost()*(1-this.CACHE_EFFECTIVENESS)));
+                    Double cost = task.getCost()*(1-this.CACHE_EFFECTIVENESS);
+                    //Thread.sleep(cost.longValue());
+                    LockSupport.parkNanos(cost.longValue()*1000);
                 }
-                task.setFinishTime(System.currentTimeMillis());
+                task.setFinishTime(System.nanoTime());
                 workerInfo.addCompletedTask(task);
                 workerInfo.incrementCount();
             }

@@ -8,7 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class DataGenerator {
     //genreate normal distribution by sampling from a normal distribution 
     private DataSet normalDataSet(){
         //create normal distribution with mean .05 and sd .05/3 so that 99.7% of events are < .1
-        NormalDistribution normalDistribution = new NormalDistribution(TARGET_MEAN, 50/3D);
+        NormalDistribution normalDistribution = new NormalDistribution(TARGET_MEAN, TARGET_MEAN/3D);
         DataSet dataSet = new DataSet();
         Task[] tasks = new Task[NUM_DISTINCT_TASKS];
         //generate costs from sampling from normal distribution
@@ -65,7 +64,7 @@ public class DataGenerator {
 
     private DataSet caucyDataSet(){
         //See https://keisan.casio.com/exec/system/1180573167 for what percentiles of this distribution look like
-        CauchyDistribution cauchyDistribution = new CauchyDistribution(TARGET_MEAN, 5);
+        CauchyDistribution cauchyDistribution = new CauchyDistribution(TARGET_MEAN, TARGET_MEAN/10);
         DataSet dataSet = new DataSet();
         Task[] tasks = new Task[NUM_DISTINCT_TASKS];
         //generate costs from sampling from normal distribution
@@ -82,14 +81,17 @@ public class DataGenerator {
     }
 
     private DataSet zipfDataSet(){
-        //this produces a mean of close to 50 which is what the others have
-        ZipfDistribution zipfDistribution = new ZipfDistribution(NUM_DISTINCT_TASKS, 1.15);
+        //this produces a mean of close to 5000 which is what the others have
+        ZipfDistribution zipfDistribution = new ZipfDistribution(NUM_DISTINCT_TASKS, 1);
+        Double mean = zipfDistribution.getNumericalMean();
+        Double multiplier = TARGET_MEAN/mean;
         DataSet dataSet = new DataSet();
         Task[] tasks = new Task[NUM_DISTINCT_TASKS];
         //generate costs from sampling from normal distribution
         for(int i=0; i < NUM_DISTINCT_TASKS; i++){
             UUID uuid = UUID.randomUUID();
-            Long sample = Math.max(1L, zipfDistribution.sample()); //make sure no 0 cost events
+            Double cost = zipfDistribution.sample()*multiplier;
+            Long sample = Math.max(100L, cost.longValue()); //make sure no 0 cost events
             tasks[i] = new Task(sample, uuid);
         }
         //generate task multiplities from sampling from uniform distribution

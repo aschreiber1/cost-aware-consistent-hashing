@@ -104,6 +104,13 @@ public class ControllerTest {
     }
 
     @Test
+    public void constantBoundedElapsedTest() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.CONSTANT);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_ELAPSED, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
     public void cryptoModuloTest() throws InterruptedException, IOException{
         DataSet dataSet = generator.getDataset(DataSetType.CRYPTO);
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MODULO, cacheEffectivness);
