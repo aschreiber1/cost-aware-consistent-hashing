@@ -2,6 +2,8 @@ package cost_aware_consistent_hashing;
 
 import static cost_aware_consistent_hashing.Constants.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.UUID;
 
 import org.apache.commons.csv.CSVFormat;
@@ -33,6 +36,7 @@ public class DataGenerator {
             case CAUCHY: dataset = caucyDataSet(); break;
             case ZIPF: dataset = zipfDataSet(); break;
             case CRYPTO: dataset = cryptoDataSet(); break;
+            case FACEBOOK: dataset = facebookDataSet(); break;
             default: throw new RuntimeException(String.format("Dataset Type %s, did not match any configured type", dataSetType));
         }
         dataset.setType(dataSetType);
@@ -157,8 +161,36 @@ public class DataGenerator {
             Task task = new Task(cost.longValue(), map.get(randInt));
             dataSet.getTasks().add(task);
         }
-        mean = dataSet.getTasks().stream().map(x->x.getCost())
-        .mapToDouble(x->x).average().getAsDouble();
         return dataSet;
+    }
+
+    private DataSet facebookDataSet() throws FileNotFoundException{
+        DataSet dataSet = new DataSet();
+        File myObj = new File("src/main/resources/facebook.txt");
+        Scanner myReader = new Scanner(myObj);
+        Map<String, Long> counts = new HashMap<>();
+        Map<String, UUID> ids = new HashMap<>();
+        while (myReader.hasNextLine()) {
+            String data = myReader.nextLine();
+            String[] splits = data.split(" ");
+            String id = splits[1];
+            Long currentCount = counts.containsKey(id) ? counts.get(id) : 0L;
+            counts.put(id, currentCount+1);
+            if(!ids.containsKey(id)){
+                ids.put(id, UUID.randomUUID());
+            }
+        }
+        myReader.close();
+
+        String[] edges = ids.keySet().toArray(new String[0]);
+        Double mean = counts.values().stream().mapToDouble(x->x).average().getAsDouble();
+        Double multiplier = TARGET_MEAN/mean;
+        for(int i=0; i < NUM_TASKS; i++){
+            String randomEdge = edges[random.nextInt(counts.size())];            
+            Double cost = counts.get(randomEdge)*multiplier;
+            Task task = new Task(cost.longValue(), ids.get(randomEdge));
+            dataSet.getTasks().add(task);
+        }
+        return dataSet;     
     }
 }

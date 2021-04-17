@@ -47,4 +47,11 @@ public class DataGeneratorTest {
         DataSet dataSet = dataGenerator.getDataset(DataSetType.CRYPTO);
         assertEquals(NUM_TASKS, dataSet.getTasks().size());
     }
+
+
+    @Test
+    public void testFacebook() throws IOException{
+        DataSet dataSet = dataGenerator.getDataset(DataSetType.FACEBOOK);
+        assertEquals(NUM_TASKS, dataSet.getTasks().size());
+    }
 }

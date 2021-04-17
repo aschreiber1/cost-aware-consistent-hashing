@@ -108,4 +108,25 @@ public class ControllerTest {
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_LOAD, cacheEffectivness);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
+
+    @Test
+    public void facebookModuloTest() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.FACEBOOK);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MODULO, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void facebookConsistentTest() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.FACEBOOK);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.CONSISTENT, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void facebookBoundedLoadTest() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.FACEBOOK);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_LOAD, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
 }
