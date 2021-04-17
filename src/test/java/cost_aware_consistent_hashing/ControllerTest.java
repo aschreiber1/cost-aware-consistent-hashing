@@ -33,6 +33,13 @@ public class ControllerTest {
     }
 
     @Test
+    public void normalSingularTest() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.CONSISTENT_SINGULAR, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
     public void normalBoundedLoadTest() throws InterruptedException, IOException{
         DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_LOAD, cacheEffectivness);

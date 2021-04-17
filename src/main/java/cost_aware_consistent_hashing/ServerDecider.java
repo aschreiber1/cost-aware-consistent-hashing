@@ -18,6 +18,7 @@ public class ServerDecider {
     //use the MD5 hash function for consistent hashing as it "mixes" well
     final HashFunction hashFunction = Hashing.hmacMd5("myKey".getBytes());
     private final TreeMap<String, Integer> map = new TreeMap<>();
+    private final TreeMap<String, Integer> singularMap = new TreeMap<>();
     private List<HashFunction> rehashFunctions = new ArrayList<>();
     private Random random = new Random();
 
@@ -28,6 +29,10 @@ public class ServerDecider {
             for(int j = 0; j < NUM_REPLICAS; j++){
                 map.put(hashFunction.hashInt(random.nextInt()).toString(), i);
             }
+        }
+        //map servers into the treemap one time for consistent singular
+        for(int i = 0; i < NUM_SERVERS; i++){
+            singularMap.put(hashFunction.hashInt(random.nextInt()).toString(), i);
         }
         //add rehash functions for our rehash function strategy 
         for(Integer i = 0; i < NUM_SERVERS; i++){
@@ -40,6 +45,7 @@ public class ServerDecider {
         switch(algorithmType){
             case MODULO : out = moduloHash(task); break;
             case CONSISTENT : out = consistentHash(task); break;
+            case CONSISTENT_SINGULAR : out = consistentSingularHash(task); break;
             case BOUNDED_LOAD : out = boundedLoad(task, queues); break;
             case REHASH : out = rehash(task, queues); break;
             case BOUNDED_ELAPSED : out = boundedElapsed(task, workerInfos, queues); break;
@@ -66,6 +72,19 @@ public class ServerDecider {
             hash = tailMap.isEmpty() ? map.firstKey() : tailMap.firstKey();
         }
         return map.get(hash);
+    }
+
+    /**
+     * 
+     * Conistent hashing but with only one bucket per server
+     */
+    private int consistentSingularHash(Task task){
+        String hash = hashFunction.hashBytes(task.getId().toString().getBytes()).toString();
+        if(!singularMap.containsKey(hash)){
+            SortedMap<String, Integer> tailMap = singularMap.tailMap(hash);
+            hash = tailMap.isEmpty() ? singularMap.firstKey() : tailMap.firstKey();
+        }
+        return singularMap.get(hash);
     }
 
     /*
