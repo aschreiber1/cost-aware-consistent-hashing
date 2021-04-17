@@ -42,7 +42,7 @@ public class ServerDecider {
             case CONSISTENT : out = consistentHash(task); break;
             case BOUNDED_LOAD : out = boundedLoad(task, queues); break;
             case REHASH : out = rehash(task, queues); break;
-           // case BOUNDED_ELAPSED : out = boundedElapsed(task, workerInfos); break;
+            case BOUNDED_ELAPSED : out = boundedElapsed(task, workerInfos, queues); break;
             default : throw new RuntimeException(String.format("Algorithm Type %s, did not match any configured type", algorithmType));
         }
         return out;
@@ -112,7 +112,7 @@ public class ServerDecider {
     * Use constant Epsilon, to make sure that load per server is less than (1+eplsilon) the average load
     * in terms of elapsed
     */
-    private int boundedElapsed(Task task, WorkerInfo[] workerInfos){
+    private int boundedElapsed(Task task, WorkerInfo[] workerInfos, BlockingQueue<Task>[] queues){
         String hash = hashFunction.hashBytes(task.getId().toString().getBytes()).toString();
         SortedMap<String, Integer> tailMap = map.tailMap(hash);
         Double avgJobPerSev = ((double) BATCH_SIZE)/NUM_SERVERS;
@@ -120,20 +120,14 @@ public class ServerDecider {
         for(Map.Entry<String, Integer> entry : tailMap.entrySet()){
             int server = entry.getValue();
             Double avg = workerInfos[server].getAverageElapsed();
-            if(avg <= allowedElapsed){
+            if(queues[server].isEmpty() || avg <= allowedElapsed){
                 return server;
-            }
-            else{
-                System.out.println("skipped");
             }
         }
         for(Map.Entry<String, Integer> entry : map.entrySet()){
             int server = entry.getValue();
-            if(workerInfos[server].getAverageElapsed() <= allowedElapsed){
+            if(queues[server].isEmpty() || workerInfos[server].getAverageElapsed() <= allowedElapsed){
                 return server;
-            }
-            else{
-               System.out.println("skipped");
             }
         }
         hash = tailMap.isEmpty() ? map.firstKey() : tailMap.firstKey();

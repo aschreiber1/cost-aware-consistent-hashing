@@ -28,7 +28,7 @@ public final class Constants {
     //goal is to have datasets have a mean of 50 milliseconds 
     public static final Long TARGET_MEAN = 50L;
     //if something has more than (1+ELAPSED_EPLISION) average load skip
-    public static final Double ELAPSED_EPLISION = 1D;
+    public static final Double ELAPSED_EPLISION = 10D;
     //How long to remember tasks for
     public static final Long MEMORY_TIME = 1000L;
 
