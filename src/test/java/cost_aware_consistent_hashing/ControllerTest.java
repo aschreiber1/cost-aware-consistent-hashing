@@ -101,4 +101,11 @@ public class ControllerTest {
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MODULO, cacheEffectivness);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
+
+    @Test
+    public void cryptoBoundedLoadTest() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.CRYPTO);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_LOAD, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
 }
