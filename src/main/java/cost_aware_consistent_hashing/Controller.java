@@ -4,6 +4,7 @@ import lombok.Getter;
 import static cost_aware_consistent_hashing.Constants.*;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -86,7 +87,7 @@ public class Controller {
             elapsedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getElapsed).mapToDouble(d -> d).toArray());
         }
         catch(NullPointerException e){
-            Thread.sleep(5000L); //Sleep for 5 seconds in case a task is still sleeping on a worker
+            Thread.sleep(2000L); //Sleep for 2 seconds in case a task is still sleeping on a worker
             elapsedStats = new DescriptiveStatistics(dataSet.getTasks().stream().map(Task::getElapsed).mapToDouble(d -> d).toArray());
         }
         int maxJobs = Integer.MIN_VALUE;
@@ -113,6 +114,11 @@ public class Controller {
 
         System.out.println(String.format("Experiment with Dataset Type %s, Algorithm Type %s, took %d", dataSet.getType(), algorithmType, endTime-startTime));
         System.out.println(results.toString());
+
+        //Stop worker threads
+        for(int i=0; i < NUM_SERVERS; i++){
+            queues[i].add(new Task(STOP_WORKER, UUID.randomUUID()));
+        }
         return results;
     }
 
