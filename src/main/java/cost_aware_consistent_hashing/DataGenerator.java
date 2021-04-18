@@ -83,16 +83,19 @@ public class DataGenerator {
     private DataSet zipfDataSet(){
         //this produces a mean of close to 5000 which is what the others have
         ZipfDistribution zipfDistribution = new ZipfDistribution(NUM_DISTINCT_TASKS, 1);
-        Double mean = zipfDistribution.getNumericalMean();
-        Double multiplier = TARGET_MEAN/mean;
+        //Magic number which is computed the following way
+        //Take the H_{2500,1}/(1+4+9+...) * Target Mean
+        //this will result in mean of 50
+        Double multiplier = (8.4/1.644)*TARGET_MEAN;
         DataSet dataSet = new DataSet();
         Task[] tasks = new Task[NUM_DISTINCT_TASKS];
         //generate costs from sampling from normal distribution
         for(int i=0; i < NUM_DISTINCT_TASKS; i++){
             UUID uuid = UUID.randomUUID();
-            Double cost = zipfDistribution.sample()*multiplier;
-            Long sample = Math.max(100L, cost.longValue()); //make sure no 0 cost events
-            tasks[i] = new Task(sample, uuid);
+            //zipf gives numbers from 1 to NUM_DISTINCT_TASKS where 1 is most frequent
+            int sample = zipfDistribution.sample();
+            Double cost = multiplier * (1D/sample);
+            tasks[i] = new Task(cost.longValue(), uuid);
         }
         //generate task multiplities from sampling from uniform distribution
         for(int i=0; i < NUM_TASKS; i++){
