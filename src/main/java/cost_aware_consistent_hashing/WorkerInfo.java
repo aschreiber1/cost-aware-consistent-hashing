@@ -29,7 +29,7 @@ public class WorkerInfo {
     }
 
     //get average elapsed time of tasks that in the last MEMORY_TIME seconds
-    public Double getAverageElapsed(){
+    public synchronized Double getAverageElapsed(){
         //remove tasks older than MEMORY_TIME
         while(!taskQueue.isEmpty() && (System.nanoTime() - taskQueue.getFirst().getFinishTime()) > MEMORY_TIME*1000){
             totalElapsed -= taskQueue.removeFirst().getElapsed();

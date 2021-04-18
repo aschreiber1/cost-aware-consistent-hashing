@@ -9,7 +9,7 @@ import org.junit.Test;
 public class ControllerTest {
     private Controller controller = new Controller();
     private DataGenerator generator = new DataGenerator();
-    private final Double cacheEffectivness = .9;
+    private final Double cacheEffectivness = .75;
     
     @Test
     public void uniformTest() throws InterruptedException, IOException{
@@ -81,7 +81,6 @@ public class ControllerTest {
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
-
     @Test
     public void zipfBoundedElapsedTest() throws InterruptedException, IOException{
         DataSet dataSet = generator.getDataset(DataSetType.ZIPF);
@@ -125,9 +124,23 @@ public class ControllerTest {
     }
 
     @Test
+    public void cryptoConsistentTest() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.CRYPTO);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.CONSISTENT, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
     public void cryptoBoundedLoadTest() throws InterruptedException, IOException{
         DataSet dataSet = generator.getDataset(DataSetType.CRYPTO);
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_LOAD, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void cryptoBoundedElapsedTest() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.CRYPTO);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_ELAPSED, cacheEffectivness);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 

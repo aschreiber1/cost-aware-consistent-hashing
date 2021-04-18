@@ -88,18 +88,15 @@ public class DataGenerator {
         //this will result in mean of 50
         Double multiplier = (8.4/1.644)*TARGET_MEAN;
         DataSet dataSet = new DataSet();
-        Task[] tasks = new Task[NUM_DISTINCT_TASKS];
+        Map<Integer, UUID> ids = new HashMap<>();
         //generate costs from sampling from normal distribution
-        for(int i=0; i < NUM_DISTINCT_TASKS; i++){
-            UUID uuid = UUID.randomUUID();
+        for(int i=0; i < NUM_TASKS; i++){
             //zipf gives numbers from 1 to NUM_DISTINCT_TASKS where 1 is most frequent
             int sample = zipfDistribution.sample();
+            UUID id = ids.getOrDefault(sample, UUID.randomUUID());
+            ids.put(sample, id);
             Double cost = multiplier * (1D/sample);
-            tasks[i] = new Task(cost.longValue(), uuid);
-        }
-        //generate task multiplities from sampling from uniform distribution
-        for(int i=0; i < NUM_TASKS; i++){
-            dataSet.getTasks().add(tasks[random.nextInt(NUM_DISTINCT_TASKS)]);
+            dataSet.getTasks().add(new Task(cost.longValue(), id));
         }
         return dataSet;
     }
@@ -146,24 +143,30 @@ public class DataGenerator {
         DataSet dataSet = new DataSet();
         String[] headers = {"symbol", "shares_traded"};
         Reader in = new FileReader("src/main/resources/crypto.csv");
-        Map<Integer, UUID> map = new HashMap<>();
+        Map<String, UUID> map = new HashMap<>();
         Iterable<CSVRecord> records = CSVFormat.DEFAULT
           .withHeader(headers)
           .withFirstRecordAsHeader()
           .parse(in);
         List<Double> costs = new ArrayList<>();
-        int count = 0;
+        List<String> symbols = new ArrayList<>();
         for (CSVRecord record : records) {
-            costs.add(Double.parseDouble(record.get("shares_traded")));
-            map.put(count, UUID.randomUUID());
-            count++;
+            Double cost = Double.parseDouble(record.get("shares_traded"));
+            String symbol = record.get("symbol");
+            if(cost == 0D){
+                continue;
+            }
+            costs.add(cost);
+            symbols.add(symbol);
+            map.put(symbol, UUID.randomUUID());
         }
         Double mean = costs.stream().mapToDouble(x->x).average().getAsDouble();
         Double multiplier = TARGET_MEAN/mean;
         for(int i=0; i < NUM_TASKS; i++){
             int randInt = random.nextInt(costs.size());            
             Double cost = costs.get(randInt)*multiplier;
-            Task task = new Task(cost.longValue(), map.get(randInt));
+            String symbol = symbols.get(randInt);
+            Task task = new Task(cost.longValue(), map.get(symbol));
             dataSet.getTasks().add(task);
         }
         return dataSet;
