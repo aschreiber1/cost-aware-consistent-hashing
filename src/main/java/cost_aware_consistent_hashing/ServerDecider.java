@@ -49,6 +49,8 @@ public class ServerDecider {
             case BOUNDED_LOAD : out = boundedLoad(task, queues); break;
             case REHASH : out = rehash(task, queues); break;
             case BOUNDED_ELAPSED : out = boundedElapsed(task, workerInfos, queues); break;
+            case MIN_CHOICE: out = minChoice(task, queues); break;
+            case MIN_CHOICE_ELAPSED: out = minChoiceElapsed(task, workerInfos); break;
             default : throw new RuntimeException(String.format("Algorithm Type %s, did not match any configured type", algorithmType));
         }
         return out;
@@ -141,10 +143,47 @@ public class ServerDecider {
             if(queues[server].isEmpty() || workerInfos[server].getAverageElapsed() <= allowedElapsed){
                 return server;
             }
-            else{
-                System.out.println("test");
-            }
         }
         return random.nextInt(NUM_SERVERS); //default to random server if everything is full
+    }
+
+     //min queue size of NUM_CHOICE 
+     private int minChoice(Task task, BlockingQueue<Task>[] queues){
+        int minServer = 0;
+        int minQueueSize = Integer.MAX_VALUE;
+        for(int i=0; i < NUM_CHOICES; i++){
+            String hash = rehashFunctions.get(i).hashBytes(task.getId().toString().getBytes()).toString();
+            Entry<String, Integer> entry = map.ceilingEntry(hash);
+            int server = entry == null ? map.floorEntry(hash).getValue() : entry.getValue();
+            int queueSize = queues[server].size();
+            if(queueSize == 0){
+                return server;
+            }
+            if(queueSize < minQueueSize){
+                minServer = server;
+                minQueueSize = queueSize;
+            }
+        }
+        return minServer;
+    }
+
+     //min avg elapased over  of NUM_CHOICE 
+     private int minChoiceElapsed(Task task, WorkerInfo[] workerInfos){
+        int minServer = 0;
+        Double minAverage = Double.MAX_VALUE;
+        for(int i=0; i < NUM_CHOICES; i++){
+            String hash = rehashFunctions.get(i).hashBytes(task.getId().toString().getBytes()).toString();
+            Entry<String, Integer> entry = map.ceilingEntry(hash);
+            int server = entry == null ? map.floorEntry(hash).getValue() : entry.getValue();
+            Double average = workerInfos[server].getAverageElapsed();
+            if(average == 0D){
+                return server;
+            }
+            if(average < minAverage){
+                minServer = server;
+                minAverage = average;
+            }
+        }
+        return minServer;
     }
 }

@@ -61,6 +61,20 @@ public class ControllerTest {
     }
 
     @Test
+    public void normalMinChoice() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MIN_CHOICE, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void normalMinChoiceElapsed() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.NORMAL);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MIN_CHOICE_ELAPSED, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
     public void zipfConsistentTest() throws InterruptedException, IOException{
         DataSet dataSet = generator.getDataset(DataSetType.ZIPF);
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.CONSISTENT, cacheEffectivness);
@@ -85,6 +99,20 @@ public class ControllerTest {
     public void zipfBoundedElapsedTest() throws InterruptedException, IOException{
         DataSet dataSet = generator.getDataset(DataSetType.ZIPF);
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_ELAPSED, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void zipffMinChoice() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.ZIPF);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MIN_CHOICE, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void zipffMinChoiceElapsed() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.ZIPF);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MIN_CHOICE_ELAPSED, cacheEffectivness);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 
@@ -141,6 +169,13 @@ public class ControllerTest {
     public void cryptoBoundedElapsedTest() throws InterruptedException, IOException{
         DataSet dataSet = generator.getDataset(DataSetType.CRYPTO);
         ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.BOUNDED_ELAPSED, cacheEffectivness);
+        assertTrue(experimentResults.getTotalTime() > 0);
+    }
+
+    @Test
+    public void cryptoMinChoice() throws InterruptedException, IOException{
+        DataSet dataSet = generator.getDataset(DataSetType.CRYPTO);
+        ExperimentResults experimentResults = controller.runExperiment(dataSet, AlgorithmType.MIN_CHOICE, cacheEffectivness);
         assertTrue(experimentResults.getTotalTime() > 0);
     }
 

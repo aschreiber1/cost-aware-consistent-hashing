@@ -31,5 +31,6 @@ public final class Constants {
     public static final Double ELAPSED_EPLISION = 10D;
     //How long to remember tasks for, right now set to the time for two batches
     public static final Long MEMORY_TIME = BATCH_TIME*2;
-
+    //Number of choices to use in multiple choice based algorithms
+    public static final int NUM_CHOICES = 3;
 }
