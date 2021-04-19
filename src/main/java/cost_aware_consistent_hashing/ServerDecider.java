@@ -132,24 +132,19 @@ public class ServerDecider {
     * in terms of elapsed
     */
     private int boundedElapsed(Task task, WorkerInfo[] workerInfos, BlockingQueue<Task>[] queues){
-        String hash = hashFunction.hashBytes(task.getId().toString().getBytes()).toString();
-        SortedMap<String, Integer> tailMap = map.tailMap(hash);
         Double avgJobPerSev = ((double) BATCH_SIZE)/NUM_SERVERS;
         Double allowedElapsed = (1+ELAPSED_EPLISION)*((double)TARGET_MEAN)*avgJobPerSev/2;
-        for(Map.Entry<String, Integer> entry : tailMap.entrySet()){
-            int server = entry.getValue();
-            Double avg = workerInfos[server].getAverageElapsed();
-            if(queues[server].isEmpty() || avg <= allowedElapsed){
-                return server;
-            }
-        }
-        for(Map.Entry<String, Integer> entry : map.entrySet()){
-            int server = entry.getValue();
+        for(int i=0; i < NUM_SERVERS; i++){
+            String hash = rehashFunctions.get(i).hashBytes(task.getId().toString().getBytes()).toString();
+            Entry<String, Integer> entry = map.ceilingEntry(hash);
+            int server = entry == null ? map.floorEntry(hash).getValue() : entry.getValue();
             if(queues[server].isEmpty() || workerInfos[server].getAverageElapsed() <= allowedElapsed){
                 return server;
             }
+            else{
+                System.out.println("test");
+            }
         }
-        hash = tailMap.isEmpty() ? map.firstKey() : tailMap.firstKey();
-        return map.get(hash);
+        return random.nextInt(NUM_SERVERS); //default to random server if everything is full
     }
 }
